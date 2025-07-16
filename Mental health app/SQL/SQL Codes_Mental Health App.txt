@@ -1,0 +1,55 @@
+DROP DATABASE IF EXISTS `mental_health_app`;
+
+CREATE DATABASE IF NOT EXISTS `mental_health_app`;
+
+CREATE TABLE IF NOT EXISTS `mental_health_app`.`users` (`User_ID` INT NOT NULL AUTO_INCREMENT , `Fullname` TEXT NOT NULL , `Phone_Number` TEXT NOT NULL , `Email_Address` TEXT NOT NULL , `Password` TEXT NOT NULL , `User_Type` TEXT NOT NULL , `Image` TEXT NOT NULL ,  `Specialist` TEXT NULL , `Gender` TEXT NULL , `Age_Group` TEXT NULL , `Communication` TEXT NULL , `Location` TEXT NULL , PRIMARY KEY (`User_ID`), UNIQUE (`Email_Address`)) ENGINE = InnoDB;
+
+CREATE TABLE IF NOT EXISTS `mental_health_app`.`appointments` (`Appointment_ID` INT NOT NULL AUTO_INCREMENT , `User_ID` INT NOT NULL , `Specialist_ID` INT NOT NULL ,  `Created_At` TEXT NOT NULL DEFAULT NOW(), `Details` TEXT NOT NULL , `Date` TEXT NOT NULL , `Time` TEXT NOT NULL , `Status` TEXT NOT NULL DEFAULT 'Pending', PRIMARY KEY (`Appointment_ID`)) ENGINE = InnoDB;
+
+CREATE TABLE IF NOT EXISTS `mental_health_app`.`self_care` (`Content_ID` INT NOT NULL AUTO_INCREMENT , `User_ID` INT NOT NULL ,  `Name` TEXT NOT NULL , `URL` TEXT NOT NULL, `Details` TEXT NOT NULL, PRIMARY KEY (`Content_ID`)) ENGINE = InnoDB;
+
+CREATE TABLE IF NOT EXISTS `mental_health_app`.`feedback` (`Feedback_ID` INT NOT NULL AUTO_INCREMENT , `Appointment_ID` INT NOT NULL, `User_ID` INT NOT NULL ,  `Created_At` TEXT NOT NULL DEFAULT NOW() , `Details` TEXT NOT NULL, PRIMARY KEY (`Feedback_ID`)) ENGINE = InnoDB;
+
+CREATE TABLE IF NOT EXISTS `mental_health_app`.`chat_users` (
+  `userid` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `avatar` varchar(255) NULL,
+  `current_session` int(11) NOT NULL,
+  `online` int(11) NOT NULL,
+   PRIMARY KEY (`userid`)
+);
+
+
+CREATE TABLE IF NOT EXISTS `mental_health_app`.`chat` (
+  `chatid` int(11) NOT NULL AUTO_INCREMENT,
+  `sender_userid` int(11) NOT NULL,
+  `reciever_userid` int(11) NOT NULL,
+  `message` text NOT NULL,
+  `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `status` int(1) NOT NULL,
+    PRIMARY KEY (`chatid`)
+);
+
+CREATE TRIGGER `mental_health_app`.`after_users`
+ AFTER INSERT ON `mental_health_app`.`users` FOR EACH ROW
+ INSERT INTO `mental_health_app`.`chat_users` SET
+ `userid` = NEW.`User_ID`,
+ `username` = NEW.`Fullname`,
+ `email` = NEW.`Email_Address`,
+ `password` = NEW.`Password` ,
+ `avatar` = NEW.`Image` ,
+ `current_session` = 0 ,
+ `online` = 0;
+
+CREATE TRIGGER `mental_health_app`.`update_users`
+ AFTER UPDATE ON `mental_health_app`.`users` FOR EACH ROW
+ UPDATE `mental_health_app`.`chat_users` SET
+ `username` = NEW.`Fullname`,
+ `email` = NEW.`Email_Address`,
+ `password` = NEW.`Password`WHERE `userid` = OLD.`User_ID`;
+
+INSERT INTO `mental_health_app`.`users`(`User_ID`, `Fullname`, `Phone_Number`, `Email_Address`, `Password`, `User_Type`) VALUES ('NULL','Administrator','+254 716 845792','admin@gmail.com',md5('12345678'),'Administrator'); 
+
+DELETE FROM `mental_health_app`.`chat_users` WHERE `chat_users`.`userid` = 1; 
